@@ -1,4 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using PhoneBook.API.Database;
+using PhoneBook.API.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
+
+ConfigureDependencies(builder.Services);
+
+ConfigureDatabase(builder.Services);
 
 // Add services to the container.
 
@@ -23,3 +31,18 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+void ConfigureDependencies(IServiceCollection services)
+{
+    //Inject dependencies
+    services.AddTransient<ICompanyRepository, CompanyRepository>();
+}
+
+void ConfigureDatabase(IServiceCollection services)
+{
+    services.AddDbContext<PhoneBookDbContext>(dbContextOptions =>
+    {
+        var connectionString = builder.Configuration.GetConnectionString("MySqlDBConnection");
+        dbContextOptions.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    });
+}

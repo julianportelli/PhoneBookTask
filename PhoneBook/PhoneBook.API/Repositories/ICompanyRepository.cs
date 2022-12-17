@@ -1,9 +1,9 @@
 ﻿using PhoneBook.API.Models;
 using PhoneBook.API.Models.DTOs;
 
-namespace PhoneBook.API.Services
+namespace PhoneBook.API.Repositories
 {
-    public interface ICompanyService
+    public interface ICompanyRepository
     {
         Task<Company> CreateCompanyAsync(string name, DateTime registrationDate);
         bool DoesCompanyNameAlreadyExist(string name);

@@ -1,8 +1,8 @@
 ﻿using PhoneBook.API.Models;
 
-namespace PhoneBook.API.Services
+namespace PhoneBook.API.Repositories
 {
-    public interface IPersonService
+    public interface IPersonRepository
     {
         Task<Person> CreatePersonAsync(string name, string phoneNumber, string address, int companyId);
         Task<Person> GetPersonByIdAsync(int id);
