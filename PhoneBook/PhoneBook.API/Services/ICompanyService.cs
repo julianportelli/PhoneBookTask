@@ -1,11 +1,12 @@
 ﻿using PhoneBook.API.Models;
 using PhoneBook.API.Models.DTOs;
 
-namespace PhoneBook.API.Repositories
+namespace PhoneBook.API.Services
 {
     public interface ICompanyService
     {
         Task<Company> CreateCompanyAsync(string name, DateTime registrationDate);
-        Task<IEnumerable<CompanyDTO>> GetAllCompaniesAsync();
+        bool DoesCompanyNameAlreadyExist(string name);
+        Task<IEnumerable<CompanyRetrieveDTO>> GetAllCompaniesAsync();
     }
 }

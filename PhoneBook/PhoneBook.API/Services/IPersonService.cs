@@ -1,6 +1,6 @@
 ﻿using PhoneBook.API.Models;
 
-namespace PhoneBook.API.Repositories
+namespace PhoneBook.API.Services
 {
     public interface IPersonService
     {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PhoneBook.API.Database.Configuration;
 using PhoneBook.API.Models;
 
 namespace PhoneBook.API.Database
@@ -11,6 +12,12 @@ namespace PhoneBook.API.Database
         public PhoneBookDbContext(DbContextOptions<PhoneBookDbContext> options)
         : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            builder.ApplyConfiguration(new CompanyEntityConfig());
         }
     }
 }
