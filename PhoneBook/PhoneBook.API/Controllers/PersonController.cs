@@ -4,6 +4,7 @@ using PhoneBook.API.Constants.Enums;
 using PhoneBook.API.Models;
 using PhoneBook.API.Models.DTOs;
 using PhoneBook.API.Repositories;
+using PhoneBook.API.Helpers;
 
 namespace PhoneBook.API.Controllers
 {
@@ -35,7 +36,7 @@ namespace PhoneBook.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
@@ -51,7 +52,23 @@ namespace PhoneBook.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Random")]
+        public async Task<IActionResult> GetRandomPerson()
+        {
+            try
+            {
+                var persons = await _personRepository.GetRandomPersonAsync();
+
+                return Ok(persons);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
@@ -61,7 +78,7 @@ namespace PhoneBook.API.Controllers
         {
             try
             {
-                var actionEnum = ToEnum<DbActionTypeEnum>(dbAction);
+                var actionEnum = EnumHelpers.ParseEnumCustom<DbActionTypeEnum>(dbAction);
 
                 var result = await _personRepository.CreateUpdateDeletePersonAsync(person, actionEnum);
 
@@ -70,20 +87,6 @@ namespace PhoneBook.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
-        private T ToEnum<T>(string enumString)
-        {
-            try
-            {
-                return (T)Enum.Parse(typeof(T), enumString);
-            }
-            catch (Exception ex)
-            {
-                string enumValues = string.Join(", ", Enum.GetNames(typeof(T)));
-
-                throw new ArgumentException($"The action \"{enumString}\" is not supported. Only {enumValues} are supported.");
             }
         }
     }

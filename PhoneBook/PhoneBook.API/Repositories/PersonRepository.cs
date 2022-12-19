@@ -77,9 +77,15 @@ namespace PhoneBook.API.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Person> GetRandomPersonAsync()
+        public async Task<Person> GetRandomPersonAsync()
         {
-            throw new NotImplementedException();
+            var personIds = _phoneBookDbContext.Persons.Select(x => x.Id).ToList();
+            var random = new Random();
+            int randomPersonIndex = random.Next(0, personIds.Count);
+
+            var person = await _phoneBookDbContext.Persons.FindAsync(personIds[randomPersonIndex]);
+
+            return person;
         }
 
         public Task<IEnumerable<Person>> SearchPersonsByFieldsAsync(string name, string phoneNumber, string address, string companyName)

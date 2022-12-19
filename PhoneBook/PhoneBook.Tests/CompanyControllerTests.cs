@@ -9,32 +9,6 @@ using PhoneBook.API.Models.DTOs;
 
 namespace PhoneBook.Tests;
 
-public class DatabaseFixture : IDisposable
-{
-
-    public DbContextOptions<PhoneBookDbContext> options;
-    public PhoneBookDbContext inMemoryDbContext;
-
-    public DatabaseFixture()
-    {
-        var guid = Guid.NewGuid().ToString();
-        options = new DbContextOptionsBuilder<PhoneBookDbContext>()
-        .UseInMemoryDatabase(databaseName: guid)
-        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))  //Avoids raising error that in-memory db doesn't support transactions
-        .Options;
-
-        inMemoryDbContext = new PhoneBookDbContext(options);
-
-        // initialize data in the test database 
-    }
-
-    public void Dispose()
-    {
-        // clean up test data from the database
-        inMemoryDbContext.Database.EnsureDeleted();
-    }
-}
-
 public class CompanyControllerTests : IClassFixture<DatabaseFixture>
 {
     private CompanyAddDTO _validCompanyAddDTO1 = new()
@@ -70,8 +44,6 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
         _fixture = fixture;
         _companyRepo = new CompanyRepository(fixture.inMemoryDbContext);
         _sut = new CompanyController(_companyRepo);
-
-
     }
 
     [Fact]
