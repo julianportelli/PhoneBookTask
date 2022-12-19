@@ -36,6 +36,7 @@ void ConfigureDependencies(IServiceCollection services)
 {
     //Inject dependencies
     services.AddTransient<ICompanyRepository, CompanyRepository>();
+    services.AddTransient<IPersonRepository, PersonRepository>();
 }
 
 void ConfigureDatabase(IServiceCollection services)

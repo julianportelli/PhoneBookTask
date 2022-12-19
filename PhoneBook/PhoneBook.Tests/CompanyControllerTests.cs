@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using MySqlConnector;
 using PhoneBook.API.Controllers;
+using PhoneBook.API.Models.DTOs;
 
 namespace PhoneBook.Tests;
 

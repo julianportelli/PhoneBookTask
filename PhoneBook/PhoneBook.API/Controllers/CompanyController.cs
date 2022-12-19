@@ -5,7 +5,7 @@ using PhoneBook.API.Repositories;
 namespace PhoneBook.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class CompanyController : ControllerBase
 {
     private readonly ICompanyRepository _companyRepository;
@@ -30,13 +30,7 @@ public class CompanyController : ControllerBase
 
             var companyRegistrationDateAsDate = DateTime.Parse(companyAddDTO.RegistrationDate);
 
-
             var company = await _companyRepository.CreateCompanyAsync(formattedCompanyName, companyRegistrationDateAsDate);
-
-            if (company == null)
-            {
-                throw new Exception("An error occured while inserting a new company");
-            }
 
             return Ok(company);
         }

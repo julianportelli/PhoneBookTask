@@ -26,7 +26,7 @@ namespace PhoneBook.API.Repositories
                         RegistrationDate = registrationDate,
                     };
 
-                    _phoneBookDbContext.Add(company);
+                    _phoneBookDbContext.Companies.Add(company);
                     await _phoneBookDbContext.SaveChangesAsync();
                     transaction.Commit();
 
@@ -35,7 +35,7 @@ namespace PhoneBook.API.Repositories
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    return null;
+                    throw ex;
                 }
             }
         }
