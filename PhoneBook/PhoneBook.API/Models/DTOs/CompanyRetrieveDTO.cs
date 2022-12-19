@@ -3,6 +3,6 @@
     public class CompanyRetrieveDTO
     {
         public Company? Company { get; set; }
-        public uint NoOfPersonsLinked { get; set; } = 0;
+        public int NoOfPersonsLinked { get; set; } = 0;
     }
 }

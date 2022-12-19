@@ -49,4 +49,20 @@ public class CompanyController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
+
+    [HttpGet]
+    [Route("All")]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var allCompanies = await _companyRepository.GetAllCompaniesWithLinkedPersonsCountAsync();
+
+            return Ok(allCompanies);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
 }

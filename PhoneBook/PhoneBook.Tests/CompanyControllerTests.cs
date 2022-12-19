@@ -1,16 +1,10 @@
 
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Moq;
 using MySqlConnector;
 using PhoneBook.API.Controllers;
-using PhoneBook.API.Database;
-using PhoneBook.API.Models;
-using PhoneBook.API.Models.DTOs;
-using PhoneBook.API.Repositories;
 
 namespace PhoneBook.Tests;
 
@@ -28,7 +22,6 @@ public class DatabaseFixture : IDisposable
         .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))  //Avoids raising error that in-memory db doesn't support transactions
         .Options;
 
-
         inMemoryDbContext = new PhoneBookDbContext(options);
 
         // initialize data in the test database 
@@ -40,7 +33,6 @@ public class DatabaseFixture : IDisposable
         inMemoryDbContext.Database.EnsureDeleted();
     }
 }
-
 
 public class CompanyControllerTests : IClassFixture<DatabaseFixture>
 {
@@ -78,7 +70,7 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
         _companyRepo = new CompanyRepository(fixture.inMemoryDbContext);
         _sut = new CompanyController(_companyRepo);
 
-        
+
     }
 
     [Fact]
@@ -94,7 +86,7 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
     public void Add_Company_Given_Object_With_Invalid_Date_Should_Return_StatusCode_400_And_Include_Date_In_Value()
     {
         var result = (ObjectResult)_sut.Add(_invalidDateCompanyAddDTO).Result;
-        
+
         result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         result.Value.ToString().Should().Contain(_invalidDateCompanyAddDTO.RegistrationDate.ToString());
     }
@@ -151,5 +143,46 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
 
         result3.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         result3.Value.Should().BeOfType<string>();
+    }
+
+    [Fact]
+    public void GetALl_Should_Not_Be_Null_And_Return_StatusCode_200()
+    {
+        var result1 = (ObjectResult)_sut.GetAll().Result;
+
+        result1.StatusCode.Should().Be(StatusCodes.Status200OK);
+        result1.Value.Should().NotBeNull();
+        result1.Value.Should().BeOfType<List<CompanyRetrieveDTO>>();
+    }
+
+    [Fact]
+    public void GetALl_Add_Company_Should_Retrieve_Company_With_Id()
+    {
+        var companyDTOToAdd = new CompanyAddDTO
+        {
+            CompanyName = "Test",
+            RegistrationDate = "2022-12-19"
+        };
+
+        var addResult = (ObjectResult)_sut.Add(companyDTOToAdd).Result;
+        var company = (Company)addResult.Value;
+
+        var result = (ObjectResult)_sut.GetAll().Result;
+        var companyRetrieveDTOList = (List<CompanyRetrieveDTO>)result.Value;
+        Assert.Contains(company.Id, companyRetrieveDTOList.Select(x => x.Company.Id));
+    }
+
+    [Fact]
+    public void GetAll_When_Exception_Thrown_Should_Return_StatusCode_500()
+    {
+        var mockCompanyRepository = new Mock<ICompanyRepository>();
+        mockCompanyRepository.Setup(s => s.GetAllCompaniesWithLinkedPersonsCountAsync())
+            .Throws(new Exception());
+
+        var companyControllerWithMock = new CompanyController(mockCompanyRepository.Object);
+
+        var result = (ObjectResult)companyControllerWithMock.GetAll().Result;
+
+        result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
     }
 }

@@ -1,4 +1,5 @@
-﻿using PhoneBook.API.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using PhoneBook.API.Database;
 using PhoneBook.API.Models;
 using PhoneBook.API.Models.DTOs;
 
@@ -44,9 +45,21 @@ namespace PhoneBook.API.Repositories
             return _phoneBookDbContext.Companies.Where(x => x.Name == name).FirstOrDefault();
         }
 
-        public Task<IEnumerable<CompanyRetrieveDTO>> GetAllCompaniesAsync()
+        public async Task<IEnumerable<CompanyRetrieveDTO>> GetAllCompaniesWithLinkedPersonsCountAsync()
         {
-            throw new NotImplementedException();
+            var companyRetrieveDTOList = new List<CompanyRetrieveDTO>();
+            var allCompanies = await _phoneBookDbContext.Companies.ToListAsync();
+
+            allCompanies.ForEach(company =>
+            {
+                companyRetrieveDTOList.Add(new CompanyRetrieveDTO
+                {
+                    Company = company,
+                    NoOfPersonsLinked = _phoneBookDbContext.Persons.Where(person => person.CompanyId == company.Id).Count()
+                });
+            });
+
+            return companyRetrieveDTOList;
         }
 
         public bool DoesCompanyNameAlreadyExist(string name)

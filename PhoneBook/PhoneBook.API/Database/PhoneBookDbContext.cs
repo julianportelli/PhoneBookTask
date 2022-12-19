@@ -6,8 +6,8 @@ namespace PhoneBook.API.Database
 {
     public class PhoneBookDbContext : DbContext
     {
-        public DbSet<Company> Companies => Set<Company>();
-        public DbSet<Person> Persons => Set<Person>();
+        public virtual DbSet<Company> Companies => Set<Company>();
+        public virtual DbSet<Person> Persons => Set<Person>();
 
         public PhoneBookDbContext(DbContextOptions<PhoneBookDbContext> options)
         : base(options)
@@ -18,6 +18,7 @@ namespace PhoneBook.API.Database
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new CompanyEntityConfig());
+            builder.ApplyConfiguration(new PersonEntityConfig());
         }
     }
 }
