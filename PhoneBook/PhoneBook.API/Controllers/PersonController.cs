@@ -5,6 +5,7 @@ using PhoneBook.API.Models;
 using PhoneBook.API.Models.DTOs;
 using PhoneBook.API.Repositories;
 using PhoneBook.API.Helpers;
+using System.ComponentModel.Design;
 
 namespace PhoneBook.API.Controllers
 {
@@ -27,7 +28,7 @@ namespace PhoneBook.API.Controllers
             {
                 if (!await _personRepository.DoesCompanyExistAsync(personAddDTO.CompanyId))
                 {
-                    return BadRequest($"Company with {nameof(PersonAddDTO.CompanyId)} does not exist");
+                    return BadRequest($"Company with {nameof(PersonAddDTO.CompanyId)} {personAddDTO.CompanyId} does not exist");
                 }
 
                 var person = await _personRepository.CreatePersonAsync(personAddDTO.FullName, personAddDTO.PhoneNumber, personAddDTO.Address, personAddDTO.CompanyId);
@@ -57,7 +58,7 @@ namespace PhoneBook.API.Controllers
         }
 
         [HttpGet]
-        [Route("Random")]
+        [Route("WildCard")]
         public async Task<IActionResult> GetRandomPerson()
         {
             try

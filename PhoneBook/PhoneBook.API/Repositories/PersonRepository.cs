@@ -88,9 +88,18 @@ namespace PhoneBook.API.Repositories
             return person;
         }
 
-        public Task<IEnumerable<Person>> SearchPersonsByFieldsAsync(string name, string phoneNumber, string address, string companyName)
+        //WIP
+        public async Task<IEnumerable<Person>> SearchPersonsByFieldsAsync(PersonSearchDTO personSearchDTO)
         {
-            throw new NotImplementedException();
+            var companies = await _phoneBookDbContext.Companies.ToListAsync();
+            var searchedPersons = await _phoneBookDbContext.Persons.Where(x =>
+            x.FullName == personSearchDTO.FullName &&
+            x.PhoneNumber == personSearchDTO.PhoneNumber &&
+            x.Address == personSearchDTO.Address &&
+            companies.Where(y => y.Id == x.Id).FirstOrDefault().Name == personSearchDTO.CompanyName
+            ).ToListAsync();
+
+            return searchedPersons;
         }
 
         public async Task<Person> CreateUpdateDeletePersonAsync(Person person, DbActionTypeEnum dbActionType)

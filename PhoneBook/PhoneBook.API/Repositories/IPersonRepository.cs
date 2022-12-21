@@ -12,7 +12,7 @@ namespace PhoneBook.API.Repositories
         Task<Company> GetCompanyByIdAsync(int id);
         Task<bool> DoesCompanyExistAsync(int id);
         Task<IEnumerable<PersonRetrieveDTO>> GetAllPersonsAsync();
-        Task<IEnumerable<Person>> SearchPersonsByFieldsAsync(string name, string phoneNumber, string address, string companyName);
+        Task<IEnumerable<Person>> SearchPersonsByFieldsAsync(PersonSearchDTO personSearchDTO);
         Task<Person> GetRandomPersonAsync();
     }
 }
