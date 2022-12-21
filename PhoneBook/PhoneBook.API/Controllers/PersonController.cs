@@ -6,6 +6,7 @@ using PhoneBook.API.Models.DTOs;
 using PhoneBook.API.Repositories;
 using PhoneBook.API.Helpers;
 using System.ComponentModel.Design;
+using System;
 
 namespace PhoneBook.API.Controllers
 {
@@ -84,6 +85,22 @@ namespace PhoneBook.API.Controllers
                 var result = await _personRepository.CreateUpdateDeletePersonAsync(person, actionEnum);
 
                 return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Search")]
+        public async Task<IActionResult> Search([FromBody] PersonSearchDTO personSearchDTO)
+        {
+            try
+            {
+                var persons = await _personRepository.SearchPersonsByFieldsAsync(personSearchDTO);
+
+                return Ok(persons);
             }
             catch (Exception ex)
             {
