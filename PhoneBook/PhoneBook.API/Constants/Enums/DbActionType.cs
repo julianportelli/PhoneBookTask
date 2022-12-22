@@ -3,7 +3,7 @@
     public enum DbActionTypeEnum
     {
         Delete = -1,
-        Insert = 0,
+        Add = 0,
         Update = 1
     }
 }

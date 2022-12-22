@@ -52,7 +52,7 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
         var result = (OkObjectResult)_sut.Add(_validCompanyAddDTO1).Result;
 
         result.StatusCode.Should().Be(StatusCodes.Status200OK);
-        result.Value.Should().BeOfType<Company>().Which.Id.Should().NotBe(0);
+        result.Value.Should().BeOfType<CompanyRetrieveDTO>().Which.Id.Should().NotBe(0);
     }
 
     [Fact]
@@ -79,33 +79,12 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public void Add_Company_When_CreateCompanyAsync_Returns_NullShould_Return_StatusCode_500()
-    {
-        var mockCompanyRepository = new Mock<ICompanyRepository>();
-
-        //Bypass unique company name rule
-        mockCompanyRepository.Setup(s => s.DoesCompanyNameAlreadyExist(It.IsAny<string>()))
-        .Returns(false);
-
-        //Return null from CreateCompanyAsync
-        mockCompanyRepository.Setup(s => s.CreateCompanyAsync(It.IsAny<string>(), It.IsAny<DateTime>()))
-            .ReturnsAsync((Company)null);
-
-        var companyControllerWithMock = new CompanyController(mockCompanyRepository.Object);
-
-        var result = (ObjectResult)companyControllerWithMock.Add(_validCompanyAddDTO1).Result;
-
-        result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
-        result.Value.Should().BeOfType<string>();
-    }
-
-    [Fact]
     public void Add_Company_Company_With_Same_Name_And_Even_With_Spaces_Should_Return_StatusCode_400()
     {
         var result1 = (ObjectResult)_sut.Add(_validCompanyAddDTO2).Result;
 
         result1.StatusCode.Should().Be(StatusCodes.Status200OK);
-        result1.Value.Should().BeOfType<Company>().Which.Id.Should().NotBe(0);
+        result1.Value.Should().BeOfType<CompanyRetrieveDTO>().Which.Id.Should().NotBe(0);
 
         var result2 = (ObjectResult)_sut.Add(_validCompanyAddDTO2).Result;
 
@@ -119,7 +98,7 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public void GetALl_Should_Not_Be_Null_And_Return_StatusCode_200()
+    public void GetAll_Should_Not_Be_Null_And_Returns_StatusCode_200()
     {
         var result1 = (ObjectResult)_sut.GetAll().Result;
 
@@ -129,7 +108,7 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
     }
 
     [Fact]
-    public void GetALl_Add_Company_Should_Retrieve_Company_With_Id()
+    public void GetAll_When_Company_Added_Should_Retrieve_Company_With_Id()
     {
         var companyDTOToAdd = new CompanyAddDTO
         {
@@ -138,11 +117,11 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
         };
 
         var addResult = (ObjectResult)_sut.Add(companyDTOToAdd).Result;
-        var company = (Company)addResult.Value;
+        var company = (CompanyRetrieveDTO)addResult.Value;
 
         var result = (ObjectResult)_sut.GetAll().Result;
         var companyRetrieveDTOList = (List<CompanyRetrieveDTO>)result.Value;
-        Assert.Contains(company.Id, companyRetrieveDTOList.Select(x => x.Company.Id));
+        Assert.Contains(company.Id, companyRetrieveDTOList.Select(x => x.Id));
     }
 
     [Fact]

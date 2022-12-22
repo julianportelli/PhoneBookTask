@@ -11,7 +11,7 @@ namespace PhoneBook.Tests
 {
     public class PersonControllerTests : IClassFixture<DatabaseFixture>
     {
-        private PersonAddDTO _validPersonAddDTO1 = new()
+        private PersonAddUpdateDTO _validPersonAddDTO1 = new()
         {
             FullName = "Joshua",
             Address = "Manikata",
@@ -19,7 +19,7 @@ namespace PhoneBook.Tests
             CompanyId = 1
         };
 
-        private PersonAddDTO _invalidDatePersonAddDTO = new()
+        private PersonAddUpdateDTO _invalidDatePersonAddDTO = new()
         {
             FullName = "Joshua",
             Address = "Manikata",
@@ -39,12 +39,12 @@ namespace PhoneBook.Tests
         }
 
         [Fact]
-        public void GetAll_Should_Return_StatusCode_200_And_Type_Should_Be_List_Of_PersonRetrieveDTO()
+        public void GetAll_Should_Return_StatusCode_200_And_Type_Should_Be_List_Of_PersonBasicRetrieveDTO()
         {
             var result = (OkObjectResult)_sut.GetAll().Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().BeOfType<List<PersonRetrieveDTO>>();
+            result.Value.Should().BeOfType<List<PersonBasicRetrieveDTO>>();
         }
 
         [Fact]
@@ -64,13 +64,13 @@ namespace PhoneBook.Tests
         public void GetRandomPerson_Returns_200()
         {
             var mockRepo = new Mock<IPersonRepository>();
-            mockRepo.Setup(s => s.GetRandomPersonAsync()).ReturnsAsync(new Person());
+            mockRepo.Setup(s => s.GetRandomPersonAsync()).ReturnsAsync(new PersonRetrieveDTO());
 
             var controller = new PersonController(mockRepo.Object);
             var result = (ObjectResult)controller.GetRandomPerson().Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().BeOfType<Person>();
+            result.Value.Should().BeOfType<PersonRetrieveDTO>();
         }
 
         [Fact]
@@ -106,13 +106,13 @@ namespace PhoneBook.Tests
             mockRepo.Setup(s => s.DoesCompanyExistAsync(It.IsAny<int>())).ReturnsAsync(true); //Bypass validation
             mockRepo.Setup(s => s.CreatePersonAsync(
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
-                .ReturnsAsync(new Person());
+                .ReturnsAsync(new PersonRetrieveDTO());
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.Add(new PersonAddDTO { CompanyId = 99999 }).Result;
+            var result = (ObjectResult)controller.Add(new PersonAddUpdateDTO { CompanyId = 99999 }).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().BeOfType<Person>();
+            result.Value.Should().BeOfType<PersonRetrieveDTO>();
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace PhoneBook.Tests
             mockRepo.Setup(s => s.DoesCompanyExistAsync(It.IsAny<int>())).ReturnsAsync(false);
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.Add(new PersonAddDTO { CompanyId = 99999}).Result;
+            var result = (ObjectResult)controller.Add(new PersonAddUpdateDTO { CompanyId = 99999}).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Value.Should().BeOfType<string>().Which.Should().Contain("does not exist");
@@ -135,7 +135,7 @@ namespace PhoneBook.Tests
             mockRepo.Setup(s => s.DoesCompanyExistAsync(It.IsAny<int>())).Throws(new Exception());
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.Add(It.IsAny<PersonAddDTO>()).Result;
+            var result = (ObjectResult)controller.Add(It.IsAny<PersonAddUpdateDTO>()).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
             result.Value.Should().BeOfType<string>();
