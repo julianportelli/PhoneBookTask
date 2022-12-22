@@ -4,7 +4,9 @@ using PhoneBook.API.Database;
 using PhoneBook.API.Models;
 using PhoneBook.API.Models.DTOs;
 using System.ComponentModel.Design;
+using System.Linq;
 using System.Net;
+using System.Xml.Linq;
 
 namespace PhoneBook.API.Repositories
 {
@@ -17,7 +19,7 @@ namespace PhoneBook.API.Repositories
             _phoneBookDbContext = phoneBookDbContext;
         }
 
-        public async Task<Person> CreatePersonAsync(string fullName, string phoneNumber, string address, int companyId)
+        public async Task<PersonRetrieveDTO> CreatePersonAsync(string fullName, string phoneNumber, string address, int companyId)
         {
             using (var transaction = _phoneBookDbContext.Database.BeginTransaction())
             {
@@ -35,7 +37,23 @@ namespace PhoneBook.API.Repositories
                     await _phoneBookDbContext.SaveChangesAsync();
                     transaction.Commit();
 
-                    return person;
+                    var personRetrieveDTO = _phoneBookDbContext.Persons.Include(p => p.Company).Where(p => p.Id == person.Id)
+                        .Select(p => new PersonRetrieveDTO
+                        {
+                            Id = p.Id,
+                            FullName = p.FullName,
+                            PhoneNumber = p.PhoneNumber,
+                            Address = p.Address,
+                            Company = new CompanyPersonRetrieveDTO
+                            {
+                                Id = p.Company.Id,
+                                Name = p.Company.Name,
+                                RegistrationDate = p.Company.RegistrationDate,
+                            }
+                        })
+                        .FirstOrDefault();
+
+                    return personRetrieveDTO;
                 }
                 catch (Exception ex)
                 {
@@ -45,22 +63,17 @@ namespace PhoneBook.API.Repositories
             }
         }
 
-        public async Task<IEnumerable<PersonRetrieveDTO>> GetAllPersonsAsync()
+        public async Task<IEnumerable<PersonBasicRetrieveDTO>> GetAllPersonsAsync()
         {
-            var allPersons = await _phoneBookDbContext.Persons.ToListAsync();
-            var allCompanies = await _phoneBookDbContext.Companies.ToListAsync();
-
-            var personsRetrieveDTOList = new List<PersonRetrieveDTO>();
-            allPersons.ForEach(person =>
+            var persons = await _phoneBookDbContext.Persons.Select(p => new PersonBasicRetrieveDTO
             {
-                personsRetrieveDTOList.Add(new PersonRetrieveDTO
-                {
-                    Person = person,
-                    Company = allCompanies.Where(x => x.Id == person.CompanyId).FirstOrDefault()
-                });
-            });
+                Id = p.Id,
+                FullName = p.FullName,
+                Address = p.Address,
+                PhoneNumber = p.PhoneNumber,
+            }).ToListAsync();
 
-            return personsRetrieveDTOList;
+            return persons;
         }
 
         public async Task<bool> DoesCompanyExistAsync(int id)
@@ -77,29 +90,57 @@ namespace PhoneBook.API.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<Person> GetRandomPersonAsync()
+        public async Task<PersonRetrieveDTO> GetRandomPersonAsync()
         {
             var personIds = _phoneBookDbContext.Persons.Select(x => x.Id).ToList();
             var random = new Random();
             int randomPersonIndex = random.Next(0, personIds.Count);
 
-            var person = await _phoneBookDbContext.Persons.FindAsync(personIds[randomPersonIndex]);
+            var person = await _phoneBookDbContext.Persons
+                .Include(p => p.Company)
+                .Where(p => p.Id == personIds[randomPersonIndex])
+                .Select(p => new PersonRetrieveDTO
+                {
+                    Id = p.Id,
+                    FullName = p.FullName,
+                    PhoneNumber = p.PhoneNumber,
+                    Address = p.Address,
+                    Company = new CompanyPersonRetrieveDTO
+                    {
+                        Id = p.Company.Id,
+                        Name = p.Company.Name,
+                        RegistrationDate = p.Company.RegistrationDate,
+                    }
+                }).FirstOrDefaultAsync();
 
             return person;
         }
 
         //WIP
-        public async Task<IEnumerable<Person>> SearchPersonsByFieldsAsync(PersonSearchDTO personSearchDTO)
+        public async Task<IEnumerable<PersonRetrieveDTO>> SearchPersonsByFieldsAsync(PersonSearchDTO personSearchDTO)
         {
-            var companies = await _phoneBookDbContext.Companies.ToListAsync();
-            var searchedPersons = await _phoneBookDbContext.Persons.Where(x =>
-            x.FullName == personSearchDTO.FullName &&
-            x.PhoneNumber == personSearchDTO.PhoneNumber &&
-            x.Address == personSearchDTO.Address &&
-            companies.Where(y => y.Id == x.Id).FirstOrDefault().Name == personSearchDTO.CompanyName
-            ).ToListAsync();
+            var persons = await _phoneBookDbContext.Persons
+                .Include(p => p.Company)
+                .Where(p => p.FullName.Contains(personSearchDTO.FullName))
+                .Where(p => p.PhoneNumber.Contains(personSearchDTO.PhoneNumber))
+                .Where(p => p.Address.Contains(personSearchDTO.Address))
+                .Where(p => p.Company.Name.Contains(personSearchDTO.CompanyName))
+                .Select(p => new PersonRetrieveDTO
+                {
+                    Id = p.Id,
+                    FullName = p.FullName,
+                    PhoneNumber = p.PhoneNumber,
+                    Address = p.Address,
+                    Company = new CompanyPersonRetrieveDTO
+                    {
+                        Id = p.Company.Id,
+                        Name = p.Company.Name,
+                        RegistrationDate = p.Company.RegistrationDate,
+                    }
+                })
+                .ToListAsync();
 
-            return searchedPersons;
+            return persons;
         }
 
         public async Task<Person> CreateUpdateDeletePersonAsync(Person person, DbActionTypeEnum dbActionType)

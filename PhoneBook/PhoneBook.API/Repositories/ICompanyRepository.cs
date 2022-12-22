@@ -5,7 +5,7 @@ namespace PhoneBook.API.Repositories
 {
     public interface ICompanyRepository
     {
-        Task<Company> CreateCompanyAsync(string name, DateTime registrationDate);
+        Task<CompanyRetrieveDTO> CreateCompanyAsync(string name, DateTime registrationDate);
         bool DoesCompanyNameAlreadyExist(string name);
         Task<IEnumerable<CompanyRetrieveDTO>> GetAllCompaniesWithLinkedPersonsCountAsync();
     }

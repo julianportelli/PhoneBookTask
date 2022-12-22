@@ -10,6 +10,11 @@ namespace PhoneBook.API.Database.Configuration
         {
             builder.ToTable("Person");
             builder.HasKey(p => p.Id);
+            builder
+                .HasOne(p => p.Company)
+                .WithMany(c => c.Persons)
+                .HasForeignKey(p => p.CompanyId)
+                .IsRequired();
         }
     }
 }

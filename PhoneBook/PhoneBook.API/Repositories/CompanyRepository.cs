@@ -14,7 +14,7 @@ namespace PhoneBook.API.Repositories
             _phoneBookDbContext = phoneBookDbContext;
         }
 
-        public async Task<Company> CreateCompanyAsync(string name, DateTime registrationDate)
+        public async Task<CompanyRetrieveDTO> CreateCompanyAsync(string name, DateTime registrationDate)
         {
             using (var transaction = _phoneBookDbContext.Database.BeginTransaction())
             {
@@ -30,7 +30,14 @@ namespace PhoneBook.API.Repositories
                     await _phoneBookDbContext.SaveChangesAsync();
                     transaction.Commit();
 
-                    return company;
+                    var companyRetrieveDTO = new CompanyRetrieveDTO
+                    {
+                        Id = company.Id,
+                        Name = company.Name,
+                        RegistrationDate = company.RegistrationDate
+                    };
+
+                    return companyRetrieveDTO;
                 }
                 catch (Exception ex)
                 {
@@ -40,31 +47,30 @@ namespace PhoneBook.API.Repositories
             }
         }
 
-        private Company GetCompanyByName(string name)
-        {
-            return _phoneBookDbContext.Companies.Where(x => x.Name == name).FirstOrDefault();
-        }
-
         public async Task<IEnumerable<CompanyRetrieveDTO>> GetAllCompaniesWithLinkedPersonsCountAsync()
         {
-            var companyRetrieveDTOList = new List<CompanyRetrieveDTO>();
-            var allCompanies = await _phoneBookDbContext.Companies.ToListAsync();
+            List<CompanyRetrieveDTO> companyWithLinkedPersons;
 
-            allCompanies.ForEach(company =>
+            companyWithLinkedPersons = await _phoneBookDbContext.Companies.Include(c => c.Persons).Select(c => new CompanyRetrieveDTO
             {
-                companyRetrieveDTOList.Add(new CompanyRetrieveDTO
+                Id = c.Id,
+                Name = c.Name,
+                RegistrationDate = c.RegistrationDate,
+                Persons = c.Persons.Select(p => new PersonCompanyRetrieveDTO
                 {
-                    Company = company,
-                    NoOfPersonsLinked = _phoneBookDbContext.Persons.Where(person => person.CompanyId == company.Id).Count()
-                });
-            });
+                    Id = p.Id,
+                    FullName = p.FullName,
+                    PhoneNumber = p.PhoneNumber
+                }).ToList(),
+                NoOfPersonsLinked = c.Persons.Count()
+            }).ToListAsync();
 
-            return companyRetrieveDTOList;
+            return companyWithLinkedPersons;
         }
 
         public bool DoesCompanyNameAlreadyExist(string name)
         {
-            return GetCompanyByName(name) != null;
+            return _phoneBookDbContext.Companies.Where(x => x.Name == name).FirstOrDefault() != null;
         }
     }
 }
