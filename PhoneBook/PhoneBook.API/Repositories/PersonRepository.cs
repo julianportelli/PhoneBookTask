@@ -113,7 +113,6 @@ namespace PhoneBook.API.Repositories
             return person;
         }
 
-        //WIP
         public async Task<IEnumerable<PersonRetrieveDTO>> SearchPersonsByFieldsAsync(PersonSearchDTO personSearchDTO)
         {
             var persons = await _phoneBookDbContext.Persons

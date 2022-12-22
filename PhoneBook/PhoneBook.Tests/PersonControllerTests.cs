@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PhoneBook.API.Constants.Enums;
 using PhoneBook.API.Controllers;
 using System;
 using System.Collections.Generic;
@@ -116,13 +117,13 @@ namespace PhoneBook.Tests
         }
 
         [Fact]
-        public void Add_Invalid_Company_Returns_StatusCode_400()
+        public void Add_Given_Invalid_Company_Returns_StatusCode_400()
         {
             var mockRepo = new Mock<IPersonRepository>();
             mockRepo.Setup(s => s.DoesCompanyExistAsync(It.IsAny<int>())).ReturnsAsync(false);
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.Add(new PersonAddUpdateDTO { CompanyId = 99999}).Result;
+            var result = (ObjectResult)controller.Add(new PersonAddUpdateDTO { CompanyId = 99999 }).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Value.Should().BeOfType<string>().Which.Should().Contain("does not exist");
@@ -141,6 +142,68 @@ namespace PhoneBook.Tests
             result.Value.Should().BeOfType<string>();
         }
 
+        [Fact]
+        public void AddEditRemove_Returns_StatusCode_200_And_Type_Should_Be_List_Of_PersonRetrieveDTO()
+        {
+            var mockRepo = new Mock<IPersonRepository>();
+            mockRepo.Setup(s => s.CreateUpdateDeletePersonAsync(It.IsAny<PersonAddUpdateDTO>(), It.IsAny<DbActionTypeEnum>())).ReturnsAsync(new PersonAddUpdateResultDTO());
+
+            var controller = new PersonController(mockRepo.Object);
+            var result = (ObjectResult)controller.AddEditRemove(new PersonAddUpdateDTO(), "Add").Result;
+
+            result.StatusCode.Should().Be(StatusCodes.Status200OK);
+            result.Value.Should().BeOfType<PersonAddUpdateResultDTO>();
+        }
+
+        [Fact]
+        public void AddEditRemove_Given_Invalid_DbAction_Returns_400()
+        {
+            var dbAction = "ABC123";
+            var result = (ObjectResult)_sut.AddEditRemove(new PersonAddUpdateDTO(), dbAction).Result;
+
+            result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            result.Value.Should().BeOfType<string>();
+            Assert.Contains(dbAction, result.Value.ToString());
+        }
+
+        [Fact]
+        public void AddEditRemove_When_Exception_Thrown_Returns_500()
+        {
+            var mockRepo = new Mock<IPersonRepository>();
+            mockRepo.Setup(s => s.CreateUpdateDeletePersonAsync(It.IsAny<PersonAddUpdateDTO>(), It.IsAny<DbActionTypeEnum>())).Throws(new Exception());
+
+            var controller = new PersonController(mockRepo.Object);
+            var result = (ObjectResult)controller.AddEditRemove(new PersonAddUpdateDTO(), "Add").Result;
+
+            result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+            result.Value.Should().BeOfType<string>();
+        }
+
+        [Fact]
+        public void SearchPersonsByFieldsAsync_Returns_StatusCode_200_And_Type_Should_Be_List_Of_PersonRetrieveDTO()
+        {
+            var mockRepo = new Mock<IPersonRepository>();
+            mockRepo.Setup(s => s.SearchPersonsByFieldsAsync(It.IsAny<PersonSearchDTO>())).ReturnsAsync(new List<PersonRetrieveDTO>());
+
+            var controller = new PersonController(mockRepo.Object);
+            var result = (ObjectResult)controller.Search(new PersonSearchDTO()).Result;
+
+            result.StatusCode.Should().Be(StatusCodes.Status200OK);
+            result.Value.Should().BeOfType<List<PersonRetrieveDTO>>();
+        }
+
+        [Fact]
+        public void SearchPersonsByFieldsAsync_On_Exception_Returns_StatusCode_500()
+        {
+            var mockRepo = new Mock<IPersonRepository>();
+            mockRepo.Setup(s => s.SearchPersonsByFieldsAsync(It.IsAny<PersonSearchDTO>())).Throws(new Exception());
+
+            var controller = new PersonController(mockRepo.Object);
+            var result = (ObjectResult)controller.Search(new PersonSearchDTO()).Result;
+
+            result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+            result.Value.Should().BeOfType<string>();
+        }
 
     }
 }

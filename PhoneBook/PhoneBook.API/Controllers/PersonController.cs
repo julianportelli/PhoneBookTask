@@ -84,7 +84,7 @@ namespace PhoneBook.API.Controllers
 
                 var result = await _personRepository.CreateUpdateDeletePersonAsync(person, actionEnum);
 
-                return Ok();
+                return Ok(result);
             }
             catch (ArgumentException ex){
                 return BadRequest(ex.Message);
