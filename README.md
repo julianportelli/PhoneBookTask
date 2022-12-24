@@ -1,5 +1,17 @@
 # phone_book_task_helio
 
+This is my submission for the coding task given to me by Helio Gaming.
+
+There are two projects under the PhoneBook directory. One is PhoneBook.API, which contains the actual implementation of the API, and the other is PhoneBook.Tests, which contains unit tests for the API.
+To get started, open PhoneBook/PhoneBook.sln in Visual Studio. You probably will need to restore NuGet packages.
+
+- Target framework: net6.0
+- Database used: MySql
+- Dependency injection for controller dependencies was used using AddTransient method in Program.cs
+- ORM: Entity Framework Core
+- Unit test packages: XUnit (for creating unit tests), Moq + EntityFrameworkCoreMock.Moq (for mocking interfaces and dbcontext), FluentAssertions (for cleaner assertions (sometimes)), EntityFrameworkCore.InMemory (for in-memory database testing)
+- Unit tests cover all code except Program.cs
+
 ## Phone Book Task
 Implement an application in C# \ .Net to manage the following two entities: companies and persons.
 
