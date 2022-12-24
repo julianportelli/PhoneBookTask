@@ -1,0 +1,196 @@
+{
+	"info": {
+		"_postman_id": "f9aa4925-b016-4ea0-b83d-11c28e38c87d",
+		"name": "PhoneBook.API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Add Company",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"CompanyName\" : \"Facebook\",\r\n    \"RegistrationDate\" : \"2007-01-04\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7286/api/Company/Add",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7286",
+					"path": [
+						"api",
+						"Company",
+						"Add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Companies",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7286/api/Company/All",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7286",
+					"path": [
+						"api",
+						"Company",
+						"All"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Person",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"FullName\": \"Zoe Farrugia\",\r\n    \"PhoneNumber\": \"99014928\",\r\n    \"Address\": \"Mellieha\",\r\n    \"CompanyId\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7286/api/Person/Add",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7286",
+					"path": [
+						"api",
+						"Person",
+						"Add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Edit Remove Person",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 34,\r\n  \"fullName\": \"AAA\",\r\n  \"phoneNumber\": \"123456\",\r\n  \"address\": \"BBBB\",\r\n  \"companyId\": 123\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7286/api/Person/AddEditRemove/Add",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7286",
+					"path": [
+						"api",
+						"Person",
+						"AddEditRemove",
+						"Add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Persons",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7286/api/Person/All",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7286",
+					"path": [
+						"api",
+						"Person",
+						"All"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Person by Fields",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"fullName\": \"\",\r\n  \"phoneNumber\": \"\",\r\n  \"address\": \"\",\r\n  \"companyName\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7286/api/Person/Search",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7286",
+					"path": [
+						"api",
+						"Person",
+						"Search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Person Wildcard",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7286/api/Person/Wildcard",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7286",
+					"path": [
+						"api",
+						"Person",
+						"Wildcard"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
