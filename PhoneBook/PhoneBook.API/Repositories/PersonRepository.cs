@@ -82,11 +82,6 @@ namespace PhoneBook.API.Repositories
             return await _phoneBookDbContext.Companies.AnyAsync(x => x.Id == id);
         }
 
-        private async Task<bool> DoesPersonExistAsync(int id)
-        {
-            return await _phoneBookDbContext.Persons.AnyAsync(x => x.Id == id);
-        }
-
         public async Task<PersonRetrieveDTO> GetRandomPersonAsync()
         {
             var personIds = _phoneBookDbContext.Persons.Select(x => x.Id).ToList();
@@ -139,33 +134,27 @@ namespace PhoneBook.API.Repositories
             return persons;
         }
 
-        public async Task<PersonAddUpdateResultDTO> CreateUpdateDeletePersonAsync(PersonAddUpdateDTO personAddUpdateDTO, DbActionTypeEnum dbActionType)
+        public async Task<PersonAddUpdateDeleteResultDTO> CreateUpdateDeletePersonAsync(PersonAddUpdateDeleteDTO personAddUpdateDTO, DbActionTypeEnum dbActionType)
         {
             using (var transaction = _phoneBookDbContext.Database.BeginTransaction())
             {
                 string nonExistantPersonErrorMessage = $"Person with {nameof(Person.Id)} {personAddUpdateDTO.Id} does not exist";
                 string nonExistantCompanyErrorMessage = $"Company with {nameof(Company.Id)} {personAddUpdateDTO.CompanyId} does not exist";
-                bool changesMade = true;
 
                 try
                 {
+                    bool changesMade = true;
+                    Person personToBeAdded = new();
+
                     switch (dbActionType)
                     {
-                        case DbActionTypeEnum.Delete:
-                            if (!await DoesPersonExistAsync(personAddUpdateDTO.Id))
-                            {
-                                throw new ArgumentException(nonExistantPersonErrorMessage);
-                            }
-
-                            _phoneBookDbContext.Remove(personAddUpdateDTO.Id);
-                            break;
                         case DbActionTypeEnum.Add:
                             if (!await DoesCompanyExistAsync(personAddUpdateDTO.CompanyId))
                             {
                                 throw new ArgumentException(nonExistantCompanyErrorMessage);
                             }
 
-                            var personToAdd = new Person
+                            personToBeAdded = new Person
                             {
                                 FullName = personAddUpdateDTO.FullName,
                                 PhoneNumber = personAddUpdateDTO.PhoneNumber,
@@ -173,12 +162,12 @@ namespace PhoneBook.API.Repositories
                                 CompanyId = personAddUpdateDTO.CompanyId
                             };
 
-                            _phoneBookDbContext.Persons.Add(personToAdd);
+                            _phoneBookDbContext.Persons.Add(personToBeAdded);
                             break;
                         case DbActionTypeEnum.Update:
                             var personToUpdate = await _phoneBookDbContext.Persons.FindAsync(personAddUpdateDTO.Id);
 
-                            if(personToUpdate == null)
+                            if (personToUpdate == null)
                             {
                                 throw new ArgumentException(nonExistantPersonErrorMessage);
                             }
@@ -195,6 +184,16 @@ namespace PhoneBook.API.Repositories
 
                             _phoneBookDbContext.Persons.Update(personToUpdate);
                             break;
+                        case DbActionTypeEnum.Delete:
+                            var personToDelete = await _phoneBookDbContext.Persons.FindAsync(personAddUpdateDTO.Id);
+
+                            if (personToDelete == null)
+                            {
+                                throw new ArgumentException(nonExistantPersonErrorMessage);
+                            }
+
+                            _phoneBookDbContext.Persons.Remove(personToDelete);
+                            break;
                         default:
                             changesMade = false;
                             break;
@@ -204,9 +203,14 @@ namespace PhoneBook.API.Repositories
                     {
                         await _phoneBookDbContext.SaveChangesAsync();
                         transaction.Commit();
+
+                        if (dbActionType == DbActionTypeEnum.Add)
+                        {
+                            personAddUpdateDTO.Id = personToBeAdded.Id;
+                        }
                     }
 
-                    return new PersonAddUpdateResultDTO
+                    return new PersonAddUpdateDeleteResultDTO
                     {
                         PersonAddUpdateDTO = personAddUpdateDTO,
                         ChangesMade = changesMade

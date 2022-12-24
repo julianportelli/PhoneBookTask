@@ -4,6 +4,7 @@
     {
         Delete = -1,
         Add = 0,
-        Update = 1
+        Update = 1,
+        Other = -999
     }
 }

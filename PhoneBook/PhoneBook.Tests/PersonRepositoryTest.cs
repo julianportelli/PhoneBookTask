@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PhoneBook.API.Constants.Enums;
+using PhoneBook.API.Models.DTOs;
 
 namespace PhoneBook.Tests
 {
@@ -148,6 +150,179 @@ namespace PhoneBook.Tests
                 Assert.True(fixtureInMemoryDbContext.Persons.Select(x => x.Id).Contains(result.Id));
                 Assert.True(fixtureInMemoryDbContext.Companies.Select(x => x.Id).Contains(result.Company.Id));
             }
+        }
+
+        [Fact]
+        public void CreateUpdateDeletePersonAsync_Given_Valid_DTO_And_New_Creates_New_Record()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+            var personCount = fixtureInMemoryDbContext.Persons.Count();
+            var company = fixtureInMemoryDbContext.Companies.First();
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO
+            {
+                Id = 0,
+                FullName = "Joseph",
+                PhoneNumber = "98989898",
+                Address = "Marsalforn",
+                CompanyId = company.Id
+            };
+
+            var result = sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Add).Result;
+
+            result.PersonAddUpdateDTO.Should().NotBeNull();
+            result.PersonAddUpdateDTO.Id.Should().NotBe(0);
+            result.ChangesMade.Should().Be(true);
+            Assert.True(fixtureInMemoryDbContext.Persons.Count() == personCount + 1);
+        }
+
+        [Fact]
+        public async void CreateUpdateDeletePersonAsync_Given_Invalid_CompanyId_Throws_AgrumentException()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO
+            {
+                Id = 0,
+                FullName = "Joseph",
+                PhoneNumber = "98989898",
+                Address = "Marsalforn",
+                CompanyId = -1
+            };
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Add));
+            Assert.Contains(personAddUpdateDTO.CompanyId.ToString(), exception.Message);
+        }
+
+        [Fact]
+        public void CreateUpdateDeletePersonAsync_Update_Given_Valid_DTO_Is_Succesful()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+            var personCount = fixtureInMemoryDbContext.Persons.Count();
+            var otherCompany = fixtureInMemoryDbContext.Companies.Last();
+            var originalPerson = fixtureInMemoryDbContext.Persons.First();
+            var originalPersonId = originalPerson.Id;
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO
+            {
+                Id = originalPerson.Id,
+                FullName = originalPerson.FullName,
+                PhoneNumber = originalPerson.PhoneNumber,
+                Address = originalPerson.Address,
+                CompanyId = otherCompany.Id
+            };
+
+            var result = sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Update).Result;
+
+            result.PersonAddUpdateDTO.Should().NotBeNull();
+            result.PersonAddUpdateDTO.CompanyId.Should().NotBe(originalPersonId);
+            result.ChangesMade.Should().Be(true);
+        }
+
+        [Fact]
+        public async void CreateUpdateDeletePersonAsync_Update_Given_Invalid_PersonId_Throws_ArgumentException()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+            var personCount = fixtureInMemoryDbContext.Persons.Count();
+            var otherCompany = fixtureInMemoryDbContext.Companies.Last();
+            var originalPerson = fixtureInMemoryDbContext.Persons.First();
+            var originalPersonId = originalPerson.Id;
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO
+            {
+                Id = -1,
+                FullName = "",
+                PhoneNumber = "",
+                Address = "",
+                CompanyId = otherCompany.Id
+            };
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Update));
+            Assert.Contains(personAddUpdateDTO.Id.ToString(), exception.Message);
+        }
+
+        [Fact]
+        public async void CreateUpdateDeletePersonAsync_Update_Given_Invalid_CompanyId_Throws_ArgumentException()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+            var personCount = fixtureInMemoryDbContext.Persons.Count();
+            var otherCompany = fixtureInMemoryDbContext.Companies.Last();
+            var originalPerson = fixtureInMemoryDbContext.Persons.First();
+            var originalPersonId = originalPerson.Id;
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO
+            {
+                Id = originalPersonId,
+                FullName = "",
+                PhoneNumber = "",
+                Address = "",
+                CompanyId = -1
+            };
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Update));
+            Assert.Contains(personAddUpdateDTO.CompanyId.ToString(), exception.Message);
+        }
+
+        [Fact]
+        public async void CreateUpdateDeletePersonAsync_Delete_Given_Invalid_PersonId_Throws_ArgumentException()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO
+            {
+                Id = -1,
+            };
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Delete));
+            Assert.Contains(personAddUpdateDTO.Id.ToString(), exception.Message);
+        }
+
+        [Fact]
+        public async void CreateUpdateDeletePersonAsync_Delete_Given_Valid_PersonId_Removes_Record()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+            var originalPerson = fixtureInMemoryDbContext.Persons.First();
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO
+            {
+                Id = originalPerson.Id
+            };
+
+            var result = await sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Delete);
+
+            var persons = fixtureInMemoryDbContext.Persons.ToList();
+            Assert.DoesNotContain(originalPerson.Id, persons.Select(x => x.Id).ToList());
+            Assert.True(result.ChangesMade);
+        }
+
+        [Fact]
+        public async void CreateUpdateDeletePersonAsync_OtherEnum_Does_Not_Make_Changes()
+        {
+            var sut = new PersonRepository(fixtureInMemoryDbContext);
+            var originalPerson = fixtureInMemoryDbContext.Persons.First();
+
+            var personAddUpdateDTO = new PersonAddUpdateDeleteDTO();
+
+            var result = await sut.CreateUpdateDeletePersonAsync(personAddUpdateDTO, DbActionTypeEnum.Other);
+
+            Assert.False(result.ChangesMade);
+        }
+
+        [Fact]
+        public async void CreateUpdateDeletePersonAsync_Throws_Exception_When_Exception_Thrown()
+        {
+            var phoneBookDbContextMock = new DbContextMock<PhoneBookDbContext>(fixtureDbContextOptions);
+            //Uses package EntityFrameworkCoreMock.Moq
+            var companiesDbSetMock = phoneBookDbContextMock.CreateDbSetMock(x => x.Companies, _dbSetCompany.Object);
+            var personsDbSetMock = phoneBookDbContextMock.CreateDbSetMock(x => x.Persons, _dbSetPerson.Object);
+            var company = fixtureInMemoryDbContext.Companies.First();
+
+            phoneBookDbContextMock.Setup(s => s.SaveChangesAsync(default))
+            .Throws(new Exception());
+
+            var sut = new PersonRepository(phoneBookDbContextMock.Object);
+
+            await Assert.ThrowsAsync<Exception>(() => sut.CreateUpdateDeletePersonAsync(new PersonAddUpdateDeleteDTO { CompanyId = company.Id }, DbActionTypeEnum.Add));
         }
     }
 }

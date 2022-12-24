@@ -23,13 +23,13 @@ namespace PhoneBook.API.Controllers
 
         [HttpPut]
         [Route("Add")]
-        public async Task<IActionResult> Add([FromBody] PersonAddUpdateDTO personAddDTO)
+        public async Task<IActionResult> Add([FromBody] PersonAddUpdateDeleteDTO personAddDTO)
         {
             try
             {
                 if (!await _personRepository.DoesCompanyExistAsync(personAddDTO.CompanyId))
                 {
-                    return BadRequest($"Company with {nameof(PersonAddUpdateDTO.CompanyId)} {personAddDTO.CompanyId} does not exist");
+                    return BadRequest($"Company with {nameof(PersonAddUpdateDeleteDTO.CompanyId)} {personAddDTO.CompanyId} does not exist");
                 }
 
                 var person = await _personRepository.CreatePersonAsync(personAddDTO.FullName, personAddDTO.PhoneNumber, personAddDTO.Address, personAddDTO.CompanyId);
@@ -76,7 +76,7 @@ namespace PhoneBook.API.Controllers
 
         [HttpPost]
         [Route("AddEditRemove/{dbAction}")]
-        public async Task<IActionResult> AddEditRemove([FromBody] PersonAddUpdateDTO person, string dbAction)
+        public async Task<IActionResult> AddEditRemove([FromBody] PersonAddUpdateDeleteDTO person, string dbAction)
         {
             try
             {

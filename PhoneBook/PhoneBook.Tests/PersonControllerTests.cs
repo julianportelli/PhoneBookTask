@@ -12,7 +12,7 @@ namespace PhoneBook.Tests
 {
     public class PersonControllerTests : IClassFixture<PhonebookDbFixture>
     {
-        private PersonAddUpdateDTO _validPersonAddDTO1 = new()
+        private PersonAddUpdateDeleteDTO _validPersonAddDTO1 = new()
         {
             FullName = "Joshua",
             Address = "Manikata",
@@ -20,7 +20,7 @@ namespace PhoneBook.Tests
             CompanyId = 1
         };
 
-        private PersonAddUpdateDTO _invalidDatePersonAddDTO = new()
+        private PersonAddUpdateDeleteDTO _invalidDatePersonAddDTO = new()
         {
             FullName = "Joshua",
             Address = "Manikata",
@@ -110,7 +110,7 @@ namespace PhoneBook.Tests
                 .ReturnsAsync(new PersonRetrieveDTO());
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.Add(new PersonAddUpdateDTO { CompanyId = 99999 }).Result;
+            var result = (ObjectResult)controller.Add(new PersonAddUpdateDeleteDTO { CompanyId = 99999 }).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Value.Should().BeOfType<PersonRetrieveDTO>();
@@ -123,7 +123,7 @@ namespace PhoneBook.Tests
             mockRepo.Setup(s => s.DoesCompanyExistAsync(It.IsAny<int>())).ReturnsAsync(false);
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.Add(new PersonAddUpdateDTO { CompanyId = 99999 }).Result;
+            var result = (ObjectResult)controller.Add(new PersonAddUpdateDeleteDTO { CompanyId = 99999 }).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Value.Should().BeOfType<string>().Which.Should().Contain("does not exist");
@@ -136,7 +136,7 @@ namespace PhoneBook.Tests
             mockRepo.Setup(s => s.DoesCompanyExistAsync(It.IsAny<int>())).Throws(new Exception());
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.Add(It.IsAny<PersonAddUpdateDTO>()).Result;
+            var result = (ObjectResult)controller.Add(It.IsAny<PersonAddUpdateDeleteDTO>()).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
             result.Value.Should().BeOfType<string>();
@@ -146,20 +146,20 @@ namespace PhoneBook.Tests
         public void AddEditRemove_Returns_StatusCode_200_And_Type_Should_Be_List_Of_PersonRetrieveDTO()
         {
             var mockRepo = new Mock<IPersonRepository>();
-            mockRepo.Setup(s => s.CreateUpdateDeletePersonAsync(It.IsAny<PersonAddUpdateDTO>(), It.IsAny<DbActionTypeEnum>())).ReturnsAsync(new PersonAddUpdateResultDTO());
+            mockRepo.Setup(s => s.CreateUpdateDeletePersonAsync(It.IsAny<PersonAddUpdateDeleteDTO>(), It.IsAny<DbActionTypeEnum>())).ReturnsAsync(new PersonAddUpdateDeleteResultDTO());
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.AddEditRemove(new PersonAddUpdateDTO(), "Add").Result;
+            var result = (ObjectResult)controller.AddEditRemove(new PersonAddUpdateDeleteDTO(), "Add").Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().BeOfType<PersonAddUpdateResultDTO>();
+            result.Value.Should().BeOfType<PersonAddUpdateDeleteResultDTO>();
         }
 
         [Fact]
         public void AddEditRemove_Given_Invalid_DbAction_Returns_400()
         {
             var dbAction = "ABC123";
-            var result = (ObjectResult)_sut.AddEditRemove(new PersonAddUpdateDTO(), dbAction).Result;
+            var result = (ObjectResult)_sut.AddEditRemove(new PersonAddUpdateDeleteDTO(), dbAction).Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             result.Value.Should().BeOfType<string>();
@@ -170,10 +170,10 @@ namespace PhoneBook.Tests
         public void AddEditRemove_When_Exception_Thrown_Returns_500()
         {
             var mockRepo = new Mock<IPersonRepository>();
-            mockRepo.Setup(s => s.CreateUpdateDeletePersonAsync(It.IsAny<PersonAddUpdateDTO>(), It.IsAny<DbActionTypeEnum>())).Throws(new Exception());
+            mockRepo.Setup(s => s.CreateUpdateDeletePersonAsync(It.IsAny<PersonAddUpdateDeleteDTO>(), It.IsAny<DbActionTypeEnum>())).Throws(new Exception());
 
             var controller = new PersonController(mockRepo.Object);
-            var result = (ObjectResult)controller.AddEditRemove(new PersonAddUpdateDTO(), "Add").Result;
+            var result = (ObjectResult)controller.AddEditRemove(new PersonAddUpdateDeleteDTO(), "Add").Result;
 
             result.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
             result.Value.Should().BeOfType<string>();
