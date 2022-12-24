@@ -3,6 +3,10 @@
 This is my submission for the coding task given to me by Helio Gaming.
 
 There are two projects under the PhoneBook directory. One is PhoneBook.API, which contains the actual implementation of the API, and the other is PhoneBook.Tests, which contains unit tests for the API.
+
+The MySql Database Dump folder contains the dump for the MySql database used for testing. It contains some data already.
+The Postman Export folder contains the postman collection which I used to test the API manualy. You can use this to test the API yourself.
+
 To get started, open PhoneBook/PhoneBook.sln in Visual Studio. You probably will need to restore NuGet packages.
 
 - Target framework: net6.0
