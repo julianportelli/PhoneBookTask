@@ -9,27 +9,27 @@ using PhoneBook.API.Models.DTOs;
 
 namespace PhoneBook.Tests;
 
-public class CompanyControllerTests : IClassFixture<DatabaseFixture>
+public class CompanyControllerTests : IClassFixture<PhonebookDbFixture>
 {
-    private CompanyAddDTO _validCompanyAddDTO1 = new()
+    private static CompanyAddDTO _validCompanyAddDTO1 = new()
     {
-        CompanyName = "Google",
+        CompanyName = "Asus",
         RegistrationDate = "1999-04-02"
     };
 
-    private CompanyAddDTO _validCompanyAddDTO2 = new()
+    private static CompanyAddDTO _validCompanyAddDTO2 = new()
     {
-        CompanyName = "Amazon",
+        CompanyName = "New Company",
         RegistrationDate = "1994-07-05"
     };
 
-    private CompanyAddDTO _validCompanyAddDTO2CopyButWithSpaces = new()
+    private static CompanyAddDTO _validCompanyAddDTO2CopyButWithSpaces = new()
     {
-        CompanyName = " Amazon ",
+        CompanyName = $" {_validCompanyAddDTO2.CompanyName} ",
         RegistrationDate = "1994-07-05"
     };
 
-    private CompanyAddDTO _invalidDateCompanyAddDTO = new()
+    private static CompanyAddDTO _invalidDateCompanyAddDTO = new()
     {
         CompanyName = "InvalidDate",
         RegistrationDate = "2022-31-31"
@@ -37,12 +37,12 @@ public class CompanyControllerTests : IClassFixture<DatabaseFixture>
 
     private CompanyController _sut;
     private CompanyRepository _companyRepo;
-    private DatabaseFixture _fixture;
+    private PhonebookDbFixture _fixture;
 
-    public CompanyControllerTests(DatabaseFixture fixture)
+    public CompanyControllerTests(PhonebookDbFixture fixture)
     {
         _fixture = fixture;
-        _companyRepo = new CompanyRepository(fixture.inMemoryDbContext);
+        _companyRepo = new CompanyRepository(fixture.fixtureInMemoryDbContext);
         _sut = new CompanyController(_companyRepo);
     }
 

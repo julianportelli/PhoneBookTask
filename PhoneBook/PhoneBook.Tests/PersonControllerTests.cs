@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PhoneBook.Tests
 {
-    public class PersonControllerTests : IClassFixture<DatabaseFixture>
+    public class PersonControllerTests : IClassFixture<PhonebookDbFixture>
     {
         private PersonAddUpdateDTO _validPersonAddDTO1 = new()
         {
@@ -30,12 +30,12 @@ namespace PhoneBook.Tests
 
         private PersonController _sut;
         private PersonRepository _companyRepo;
-        private DatabaseFixture _fixture;
+        private PhonebookDbFixture _fixture;
 
-        public PersonControllerTests(DatabaseFixture fixture)
+        public PersonControllerTests(PhonebookDbFixture fixture)
         {
             _fixture = fixture;
-            _companyRepo = new PersonRepository(fixture.inMemoryDbContext);
+            _companyRepo = new PersonRepository(fixture.fixtureInMemoryDbContext);
             _sut = new PersonController(_companyRepo);
         }
 
