@@ -1,6 +1,6 @@
 # phone_book_task_helio
 
-This is my submission for the coding task given to me by Helio Gaming.
+This is my submission for the coding task given to me for an interview.
 
 There are two projects under the PhoneBook directory. One is PhoneBook.API, which contains the actual implementation of the API, and the other is PhoneBook.Tests, which contains unit tests for the API.
 
