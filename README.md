@@ -1,4 +1,4 @@
-# phone_book_task_helio
+# PhoneBookTask
 
 This is my submission for the coding task given to me for an interview.
 
